@@ -12,6 +12,13 @@
 ;
 ;######################################################################################
 ;
+; Change Log:
+; ===========
+; 1. Revise <initz:> to enable pull-ups on all unused ports as precaution
+;	to reduce unnecessary device current consupmtion.
+; 
+;
+;
 ;
 ; BRIEF PROJECT DESCRIPTION
 ; =========================
@@ -59,9 +66,9 @@
 ; Red - +5 V
 ; Orange - PWM servo input signal
 ;
-; Spdt switch input on PC0, A0 input on Arduino board.
+; Spdt switch input on PC0, A0 output on Arduino board.
 ; Tune servo pin on PC1, A1 input on Arduino board. Ground pin to invoke tuning.
-; Servo PWM output control signal on PB1, OC1A output, D9
+; Servo PWM output control signal on PB1, OC1A output
 ;
 ; ATmega328P cpu, 16.0000 MHz external crystal
 ;
@@ -429,9 +436,20 @@ initz:
 		rcall	zregs			; Clear lower registers R0,..,R15
 		clr		flaga			; Clear flag registers
 		clr		flagb
-
-		sbi		PORTC,PC0		; PC0/A0 input pullup on, switch input
-		sbi		PORTC,PC1		; PC1/A1 input pullup on, tune select input
+;
+; Activate pull-up resistors on all input pins, used and unused
+;
+		ldi		rmp,0b00011101
+		out		PORTB,rmp
+;
+		ldi		rmp,0b00111111
+		out		PORTC,rmp
+;
+		ldi		rmp,0b11111100
+		out		PORTD,rmp
+;
+; Define output pins		
+;
 		sbi		DDRB,PB1		; OC1A, output comparator 1A PWM output
 		sbi		DDRB,PB5		; LED
 ;
